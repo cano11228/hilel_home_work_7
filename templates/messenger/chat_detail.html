@@ -1,0 +1,23 @@
+<!-- myproject/messenger/templates/messenger/chat_detail.html -->
+{% extends 'base/base_generic.html' %}
+
+{% block content %}
+<h1>{{ chat.name }}</h1>
+
+<div>
+    {% for message in chat.messages.all %}
+        <p>{{ message.author }}: {{ message.content }} <small>{{ message.timestamp }}</small>
+        {% if message.author == request.user %}
+            <a href="{% url 'edit_message' message.pk %}">Edit</a>
+            <a href="{% url 'delete_message' message.pk %}">Delete</a>
+        {% endif %}
+        </p>
+    {% endfor %}
+</div>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Send</button>
+</form>
+{% endblock %}

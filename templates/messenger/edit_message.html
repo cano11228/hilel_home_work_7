@@ -1,0 +1,12 @@
+<!-- myproject/messenger/templates/messenger/edit_message.html -->
+{% extends 'base/base_generic.html' %}
+
+{% block content %}
+<h1>Edit Message</h1>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save</button>
+</form>
+{% endblock %}

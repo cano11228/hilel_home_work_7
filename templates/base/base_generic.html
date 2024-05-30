@@ -1,0 +1,26 @@
+<!-- myproject/templates/base/base_generic.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}Messenger{% endblock %}</title>
+</head>
+<body>
+    <header>
+        <h1>Welcome to the Messenger</h1>
+        <nav>
+            <ul>
+                <li><a href="{% url 'chat_list' %}">Chats</a></li>
+                <!-- Додайте інші посилання на навігацію -->
+            </ul>
+        </nav>
+    </header>
+    <main>
+        {% block content %}
+        <!-- Контент сторінки -->
+        {% endblock %}
+    </main>
+    <footer>
+        <p>&copy; 2024 Messenger</p>
+    </footer>
+</body>
+</html>
