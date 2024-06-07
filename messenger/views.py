@@ -5,6 +5,10 @@ from .forms import MessageForm
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import Permission
+from django.views.generic import DetailView, UpdateView, DeleteView
+from django.urls import reverse_lazy
+from .mixins import ChatRequiredMixin, MessageAuthorRequiredMixin, SuperuserRequiredMixin
+
 
 User = get_user_model()
 
@@ -13,7 +17,10 @@ def chat_list(request):
     chats = Chat.objects.filter(users=request.user)
     return render(request, 'messenger/chat_list.html', {'chats': chats})
 
-
+class ChatDetail(ChatRequiredMixin, DetailView):
+    model = Chat
+    template_name = 'messenger/chat_detail.html'
+    context_object_name = 'chat'
 
 @login_required
 def chat_detail(request, pk):
@@ -33,6 +40,11 @@ def chat_detail(request, pk):
         form = MessageForm()
 
     return render(request, 'messenger/chat_detail.html', {'chat': chat, 'form': form})
+
+class EditMessageView(MessageAuthorRequiredMixin, UpdateView):
+    model = Message
+    form_class = MessageForm
+    template_name = 'messenger/edit_message.html'
 
 @permission_required('messenger.can_edit_message')
 @login_required
@@ -58,6 +70,11 @@ def delete_message(request, pk):
     if request.user.is_superuser:
         message.delete()
     return redirect('chat_detail', pk=message.chat.pk)
+
+    class DeleteMessageView(SuperuserRequiredMixin, DeleteView):
+        model = Message
+        success_url = reverse_lazy('chat_list')
+        template_name = 'messenger/delete_message.html'
 
     # def assign_can_delete_message_permission(request, user_id):
     #     if request.method == 'POST':
