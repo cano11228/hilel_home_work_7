@@ -2,6 +2,31 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect, get_object_or_404
 from .models import Chat, Message
+from django.contrib import messages
+
+
+class UserIsAuthorMixin:
+    def dispatch(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if obj.author != request.user:
+            return redirect('chat_detail', pk=obj.chat.pk)
+        return super().dispatch(request, *args, **kwargs)
+
+class ChatParticipantsMixin:
+    def dispatch(self, request, *args, **kwargs):
+        chat = get_object_or_404(Chat, pk=kwargs['pk'])
+        if request.user not in chat.users.all():
+            return redirect('home')
+        return super().dispatch(request, *args, **kwargs)
+
+class SuperuserMessageMixin:
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        chat = self.object.chat
+        if chat.users.filter(is_superuser=True).exists():
+            messages.success(self.request, 'Ви успішно надіслали повідомлення суперюзеру')
+        return response
+
 
 class ChatAccessMixin:
     def get_chat(self, pk):

@@ -1,0 +1,12 @@
+
+{% block content %}
+  <h2>Видалити повідомлення</h2>
+  <p>Ви впевнені, що хочете видалити це повідомлення?</p>
+  <p><strong>{{ message.content }}</strong></p>
+
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit">Видалити</button>
+    <a href="{% url 'chat_detail' message.chat.pk %}">Скасувати</a>
+  </form>
+{% endblock %}

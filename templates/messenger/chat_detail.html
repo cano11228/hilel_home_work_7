@@ -4,6 +4,17 @@
 {% block content %}
 <h1>{{ chat.name }}</h1>
 
+<!-- Виведення повідомлень -->
+{% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
 <div>
     {% for message in chat.messages.all %}
         <p>{{ message.author }}: {{ message.content }} <small>{{ message.timestamp }}</small>
