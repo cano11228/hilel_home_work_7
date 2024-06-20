@@ -4,31 +4,55 @@
 {% block content %}
 <h1>{{ chat.name }}</h1>
 
-<!-- Виведення повідомлень -->
-{% if messages %}
+<!-- Display messages -->
+{% if chat.messages.exists %}
     <div class="messages">
-        {% for message in messages %}
+        {% for message in chat.messages.all %}
             <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
-                {{ message }}
+                {{ message.author }}: {{ message.content }} <small>{{ message.timestamp }}</small>
+                {% if message.author == request.user or request.user.is_superuser %}
+                    <a href="{% url 'edit_message' message.pk %}">Edit</a>
+                    <a href="{% url 'delete_message' message.pk %}">Delete</a>
+                {% endif %}
             </div>
         {% endfor %}
     </div>
 {% endif %}
-
-<div>
-    {% for message in chat.messages.all %}
-        <p>{{ message.author }}: {{ message.content }} <small>{{ message.timestamp }}</small>
-        {% if message.author == request.user %}
-            <a href="{% url 'edit_message' message.pk %}">Edit</a>
-            <a href="{% url 'delete_message' message.pk %}">Delete</a>
-        {% endif %}
-        </p>
-    {% endfor %}
-</div>
 
 <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit">Send</button>
 </form>
+
+<h2>Users</h2>
+<ul id="user-status-list">
+    {% for user in chat.users.all %}
+        <li data-username="{{ user.username }}">
+            {{ user.username }} - <span class="status">Loading...</span>
+        </li>
+    {% endfor %}
+</ul>
+
+<script>
+    function updateUserStatus() {
+        fetch("{% url 'user_status' chat.id %}")
+            .then(response => response.json())
+            .then(data => {
+                document.querySelectorAll('#user-status-list li').forEach(li => {
+                    const username = li.getAttribute('data-username');
+                    if (data[username]) {
+                        li.querySelector('.status').textContent = 'Online';
+                    } else {
+                        li.querySelector('.status').textContent = 'Offline';
+                    }
+                });
+            });
+    }
+
+    // Update status every 10 seconds
+    setInterval(updateUserStatus, 10000);
+    // Initial update
+    updateUserStatus();
+</script>
 {% endblock %}

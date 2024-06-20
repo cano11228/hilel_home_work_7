@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.utils.decorators import method_decorator
 from django.views.generic import DetailView, UpdateView, DeleteView, FormView
+from django.http import JsonResponse
 from .models import Chat, Message
 from .forms import MessageForm
 from .mixins import UserIsAuthorMixin, ChatParticipantsMixin, SuperuserMessageMixin
@@ -62,3 +63,10 @@ class DeleteMessageView(DeleteView):
 
     def get_success_url(self):
         return redirect('chat_detail', pk=self.object.chat.pk)
+
+
+@login_required
+def user_status(request, chat_id):
+    chat = get_object_or_404(Chat, pk=chat_id)
+    users_status = {user.username: user.status.is_online for user in chat.users.all()}
+    return JsonResponse(users_status)
